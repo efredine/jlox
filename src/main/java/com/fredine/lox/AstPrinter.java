@@ -39,14 +39,26 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public String visitVariableExpr(Expr.Variable expr) {
+        return expr.name.lexeme;
+    }
+
+    @Override
     public Void visitExpressionStmt(Stmt.Expression stmt) {
-        formattedStatements.add(parenthesize("Expr", stmt.expression));
+        add("Expr", stmt.expression);
         return null;
     }
 
     @Override
     public Void visitPrintStmt(Stmt.Print stmt) {
-        formattedStatements.add(parenthesize("Print", stmt.expression));
+        add("Print", stmt.expression);
+        return null;
+    }
+
+    @Override
+    public Void visitVarStmt(Stmt.Var stmt) {
+        String varName = "let " + stmt.name.lexeme;
+        add("let", new Expr.Variable(stmt.name), stmt.initializer);
         return null;
     }
 
@@ -55,12 +67,20 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<Void> {
 
         builder.append("(").append(name);
         for (Expr expr : exprs) {
+            if (expr == null) {
+                continue;
+            }
             builder.append(" ");
             builder.append(expr.accept(this));
         }
         builder.append(")");
 
         return builder.toString();
+    }
+
+    private Void add(String name, Expr... exprs) {
+        formattedStatements.add(parenthesize(name, exprs));
+        return null;
     }
 
     private Void format(List<Stmt> statements) {
