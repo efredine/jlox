@@ -1,7 +1,5 @@
 package com.fredine.lox;
 
-import org.omg.CORBA.INTERNAL;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,7 +9,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class Lox {
-    private static final Interpreter interpeter = new Interpreter();
+    private static final Interpreter interpreter = new Interpreter();
     static boolean hadError = false;
     static boolean hadRuntimeError = false;
 
@@ -58,7 +56,7 @@ public class Lox {
             return;
         }
 
-        interpeter.interpret(statements);
+        interpreter.interpret(statements);
     }
 
     static void error(int line, String message) {
