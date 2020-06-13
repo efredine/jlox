@@ -1,10 +1,12 @@
 package com.fredine.lox;
 
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 // Creates an unambiguous, if ugly, string representation of AST nodes.
 class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<Void> {
+    private int depth = 0;
     private List<String> formattedStatements = new ArrayList<>();
 
     AstPrinter(List<Stmt> statements) {
@@ -49,6 +51,14 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitBlockStmt(Stmt.Block stmt) {
+        depth += 1;
+        format(stmt.statements);
+        depth -= 1;
+        return null;
+    }
+
+    @Override
     public Void visitExpressionStmt(Stmt.Expression stmt) {
         add("Expr", stmt.expression);
         return null;
@@ -83,8 +93,17 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<Void> {
     }
 
     private Void add(String name, Expr... exprs) {
-        formattedStatements.add(parenthesize(name, exprs));
+        add(parenthesize(name, exprs));
         return null;
+    }
+
+    private Void add(String formatted) {
+        formattedStatements.add(spaces(depth * 2) + formatted);
+        return null;
+    }
+
+    private String spaces(int spaces) {
+        return CharBuffer.allocate( spaces ).toString().replace( '\0', ' ' );
     }
 
     private Void format(List<Stmt> statements) {
