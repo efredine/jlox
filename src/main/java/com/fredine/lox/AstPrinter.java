@@ -19,6 +19,11 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public String visitAssignExpr(Expr.Assign expr) {
+        return parenthesize(expr.name.lexeme + " =", expr.value);
+    }
+
+    @Override
     public String visitBinaryExpr(Expr.Binary expr) {
         return parenthesize(expr.operator.lexeme, expr.left, expr.right);
     }
@@ -57,8 +62,7 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitVarStmt(Stmt.Var stmt) {
-        String varName = "let " + stmt.name.lexeme;
-        add("let", new Expr.Variable(stmt.name), stmt.initializer);
+        add("var", new Expr.Variable(stmt.name), stmt.initializer);
         return null;
     }
 
