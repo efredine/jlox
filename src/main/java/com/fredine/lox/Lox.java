@@ -25,7 +25,7 @@ public class Lox {
     }
     private static void runFile(String path) throws IOException {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
-        run(new String(bytes, Charset.defaultCharset()));
+        run(new String(bytes, Charset.defaultCharset()), false);
         if (hadError) {
             System.exit(65);
         }
@@ -40,12 +40,12 @@ public class Lox {
 
         for (;;) {
             System.out.print("> ");
-            run(reader.readLine());
+            run(reader.readLine(), true);
             hadError = false;
         }
     }
 
-    private static void run(String source) {
+    private static void run(String source, boolean isRepl) {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
         Parser parser = new Parser(tokens);
@@ -59,6 +59,15 @@ public class Lox {
         AstPrinter astPrinter = new AstPrinter(statements);
         astPrinter.print();
         System.out.println("-------------------");
+
+        // If isRepl and there is only a single statement evaluate and print it
+        if (isRepl && statements.size() == 1) {
+            Stmt existing = statements.get(0);
+            if (existing instanceof Stmt.Expression) {
+                Stmt printed = new Stmt.Print(((Stmt.Expression)existing).expression);
+                statements.set(0, printed);
+            }
+        }
         interpreter.interpret(statements);
     }
 
