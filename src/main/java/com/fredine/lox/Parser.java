@@ -50,6 +50,10 @@ class Parser {
     }
 
     private Stmt statement() {
+        if (match(IF)) {
+            return ifStatement();
+        }
+
         if (match(PRINT)) {
             return printStatement();
         }
@@ -59,6 +63,19 @@ class Parser {
         }
 
         return expressionStatement();
+    }
+
+    private Stmt ifStatement() {
+        consume(LEFT_PAREN, "Expect '(' after 'if'.");
+        Expr condition = expression();
+        consume(RIGHT_PAREN, "Expect ')' after if condition.");
+        Stmt thenBranch = statement();
+        Stmt elseBranch = null;
+        if (match(ELSE)) {
+            elseBranch = statement();
+        }
+
+        return new Stmt.If(condition, thenBranch, elseBranch);
     }
 
     private Stmt printStatement() {
@@ -256,5 +273,16 @@ class Parser {
 
             advance();
         }
+    }
+
+    private void debug(String message) {
+        System.out.println(message);
+        int i = 0;
+        for (Token token : tokens) {
+            String line = i == current ? ">>>> " : String.format("%03d ", i);
+            System.out.println(line + token);
+            i++;
+        }
+        System.out.println();
     }
 }

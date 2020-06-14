@@ -65,6 +65,21 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitIfStmt(Stmt.If stmt) {
+        add("if", stmt.condition);
+        depth += 1;
+        format(stmt.thenBranch);
+        depth -= 1;
+        if (stmt.elseBranch != null) {
+            add("else");
+            depth += 1;
+            format(stmt.elseBranch);
+            depth -= 1;
+        }
+        return null;
+    }
+
+    @Override
     public Void visitPrintStmt(Stmt.Print stmt) {
         add("Print", stmt.expression);
         return null;
@@ -108,8 +123,13 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<Void> {
 
     private Void format(List<Stmt> statements) {
         for (Stmt statement : statements) {
-            statement.accept(this);
+            format(statement);
         }
+        return null;
+    }
+
+    private Void format(Stmt statement) {
+        statement.accept(this);
         return null;
     }
 }
