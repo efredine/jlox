@@ -2,7 +2,6 @@ package com.fredine.lox;
 
 import java.nio.CharBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 // Creates an unambiguous, if ugly, string representation of AST nodes.
@@ -72,9 +71,9 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitIfStmt(Stmt.If stmt) {
-        nested("if", stmt.condition, Collections.singletonList(stmt.thenBranch));
+        nested("if", stmt.condition, stmt.thenBranch);
         if (stmt.elseBranch != null) {
-            nested("else", null, Collections.singletonList(stmt.elseBranch));
+            nested("else", null, stmt.elseBranch);
         }
         return null;
     }
@@ -88,6 +87,12 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<Void> {
     @Override
     public Void visitVarStmt(Stmt.Var stmt) {
         add("var", new Expr.Variable(stmt.name), stmt.initializer);
+        return null;
+    }
+
+    @Override
+    public Void visitWhileStmt(Stmt.While stmt) {
+        nested("while", stmt.condition, stmt.body);
         return null;
     }
 
@@ -123,7 +128,7 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<Void> {
         return CharBuffer.allocate( spaces ).toString().replace( '\0', ' ' );
     }
 
-    private void nested(String name, Expr condition, List<Stmt> statements) {
+    private void nested(String name, Expr condition, Stmt statement) {
         StringBuilder builder = new StringBuilder();
         builder.append(name);
         if (condition != null) {
@@ -132,7 +137,7 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<Void> {
         builder.append(" [");
         add(builder.toString());
         depth += 1;
-        format(statements);
+        format(statement);
         depth -= 1;
         add("]");
     }
