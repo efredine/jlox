@@ -2,6 +2,7 @@ package com.fredine.lox;
 
 import java.nio.CharBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 // Creates an unambiguous, if ugly, string representation of AST nodes.
@@ -71,20 +72,10 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitIfStmt(Stmt.If stmt) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("[if");
-        addExpressions(builder, stmt.condition);
-        add(builder.toString());
-        depth += 1;
-        format(stmt.thenBranch);
-        depth -= 1;
+        nested("if", stmt.condition, Collections.singletonList(stmt.thenBranch));
         if (stmt.elseBranch != null) {
-            add("-- else");
-            depth += 1;
-            format(stmt.elseBranch);
-            depth -= 1;
+            nested("else", null, Collections.singletonList(stmt.elseBranch));
         }
-        add("]");
         return null;
     }
 
@@ -132,15 +123,27 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<Void> {
         return CharBuffer.allocate( spaces ).toString().replace( '\0', ' ' );
     }
 
-    private Void format(List<Stmt> statements) {
+    private void nested(String name, Expr condition, List<Stmt> statements) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(name);
+        if (condition != null) {
+            addExpressions(builder, condition);
+        }
+        builder.append(" [");
+        add(builder.toString());
+        depth += 1;
+        format(statements);
+        depth -= 1;
+        add("]");
+    }
+
+    private void format(List<Stmt> statements) {
         for (Stmt statement : statements) {
             format(statement);
         }
-        return null;
     }
 
-    private Void format(Stmt statement) {
+    private void format(Stmt statement) {
         statement.accept(this);
-        return null;
     }
 }
